@@ -13,6 +13,7 @@ import os
 from .unit   import UUnit
 from .folder import UFolder
 from .file   import UFile
+from .netcdf import UNetcdf
 
 
 class UFactory():
@@ -31,6 +32,13 @@ class UFactory():
             return UFolder(value, depth)
         if isinstance(value, str) and os.path.isfile(value):
             return UFile(value, depth)
+
+        # Files Only
+        if isinstance(value, UFile):
+            if (value.label.endswith('.nc')):
+                print("HERE" , value.path)
+                return UNetcdf(value.path, depth)
+
 
     @staticmethod
     def create_from(unit:UUnit):

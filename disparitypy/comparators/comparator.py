@@ -11,6 +11,7 @@ from ..units.factory      import UFactory
 
 from .result              import ComparisonResult
 
+
 class UComparator():
     """
         Class that compares two units

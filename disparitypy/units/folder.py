@@ -28,6 +28,10 @@ class UFolder(UUnit):
         self._path = os.path.abspath(path)
         self.depth = depth
 
+    @property
+    def path(self):
+        return self._path
+
     def children(self):
         """
             Returns other units contained inside this one
@@ -35,7 +39,7 @@ class UFolder(UUnit):
         for item in os.listdir(self._path):
             yield os.path.join(self._path, item)
 
-    def label(self):
+    def _label(self):
         """
             Representation of the instance
         """

@@ -14,6 +14,10 @@ class UUnit(ABC):
     """
     __depth : int = 0
 
+
+    # ##########################################################################
+    # Abstract methods
+    # ##########################################################################
     @abstractmethod
     def children(self):
         """
@@ -21,10 +25,17 @@ class UUnit(ABC):
         """
 
     @abstractmethod
-    def label(self):
+    def _label(self):
         """
             Returns a string representation of this unit
         """
+
+    # ##########################################################################
+    # Properties
+    # ##########################################################################
+    @property
+    def label(self):
+        return self._label()
 
     @property
     def depth(self):
@@ -37,20 +48,24 @@ class UUnit(ABC):
         self.__depth = value
 
 
+    # ##########################################################################
+    # Python built-in methods
+    # ##########################################################################
     def __eq__(self, other):
         """
             Two units are consired equal (in this case: comparable if)
         """
-        return isinstance(other, type(self)) and self.label() == other.label()
+        return isinstance(other, type(self)) and self.label == other.label
 
     def __hash__(self):
         """
             Hash function for this item depends on the class name and label
         """
-        return hash((self.__class__.__name__, self.label()))
+        return hash((self.__class__.__name__, self._label()))
 
     def __repr__(self):
         """
             String repersentation of the object
         """
-        return f"{self.__class__.__name__}({self.label()})"
+        #return f"{self.__class__.__name__}({self.label},{self.__hash__()})"
+        return f"{self.__class__.__name__}({self.label})"
