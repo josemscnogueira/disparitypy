@@ -140,8 +140,8 @@ class ComparisonResult():
         if any((x is None for x in self.__units)):
             return tuple(), tuple(), tuple()
 
-        child_1      = tuple(UFactory.create(x, self.__units[0].depth + 1) for x in self.__units[0].children())
-        child_2      = tuple(UFactory.create(x, self.__units[1].depth + 1) for x in self.__units[1].children())
+        child_1      = tuple(UFactory.create(x) for x in self.__units[0].children())
+        child_2      = tuple(UFactory.create(x) for x in self.__units[1].children())
         child_1_only = tuple(x for x in child_1 if x not in child_2)
         child_2_only = tuple(x for x in child_2 if x not in child_1)
         child_common = tuple(zip((x for x in child_1 if x not in child_1_only), \

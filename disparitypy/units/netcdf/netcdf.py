@@ -1,45 +1,31 @@
 """
     Defines abstract class for Units supported for comparison
 """
-
 # ##############################################################################
-# System Imports
+# System imports
 # ##############################################################################
-import os
+from netCDF4 import Dataset
 
 # ##############################################################################
 # Project imports
 # ##############################################################################
-from .unit import UUnit
+from ..file import UFile
+from .group import UNetcdfGroup
 
 
-class UFolder(UUnit):
+class UNetcdf(UFile):
     """
         Folder for comparison
     """
-    # Instance attributes
-    _path : str
-
-
-    def __init__(self, path:str):
-        """
-            Default Constructor
-        """
-        self._path = os.path.abspath(path)
-
-    @property
-    def path(self):
-        return self._path
-
     def children(self):
         """
             Returns other units contained inside this one
         """
-        for item in os.listdir(self._path):
-            yield os.path.join(self._path, item)
+        with Dataset(self.path) as ncid:
+            result = (UNetcdfGroup(ncid),)
 
-    def _label(self):
-        """
-            Representation of the instance
-        """
-        return os.path.basename(self._path)
+            print(list(result[0].children()))
+
+            exit(0)
+
+            return result

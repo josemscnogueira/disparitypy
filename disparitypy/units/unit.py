@@ -12,9 +12,6 @@ class UUnit(ABC):
     """
         Abstract class for Units supported for comparison
     """
-    __depth : int = 0
-
-
     # ##########################################################################
     # Abstract methods
     # ##########################################################################
@@ -44,17 +41,6 @@ class UUnit(ABC):
     def label(self):
         return self._label()
 
-    @property
-    def depth(self):
-        return self.__depth
-
-    @depth.setter
-    def depth(self, value : int):
-        if not isinstance(value, int) or value < 0:
-            raise ValueError("Depth value must be a non-negative integer value")
-        self.__depth = value
-
-
     # ##########################################################################
     # Python built-in methods
     # ##########################################################################
@@ -76,3 +62,35 @@ class UUnit(ABC):
         """
         #return f"{self.__class__.__name__}({self.label},{self.__hash__()})"
         return f"{self.__class__.__name__}({self.label})"
+
+
+
+class UAtomic(UUnit):
+    """
+        Abstract class exactly as UUnit, but children are created on constructor,
+        and access is limited to a context manager
+
+        Instances should be considered immutable
+    """
+    _children        : tuple[UUnit]
+    _context_manager : object = None
+
+
+    def __init__(self):
+        """
+            Default constructor should populate children
+            Context manager can't be none
+        """
+        assert self._context_manager is not None
+        self._children_init()
+
+    @abstractmethod
+    def _children_init(self):
+        """
+            Populates _children
+            In principle, these children should be created using the context
+            manager.
+        """
+
+    def children(self):
+        yield from self._children
