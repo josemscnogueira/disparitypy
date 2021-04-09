@@ -9,7 +9,7 @@ from queue import Queue
 from ..units.unit         import UUnit
 from ..units.factory      import UFactory
 
-from .result              import ComparisonResult
+from .result              import ComparisonResult, ComparisonStatus
 
 
 class UComparator():

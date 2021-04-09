@@ -38,10 +38,12 @@ class ComparisonStatus(Enum):
         """
             Creates a Comparison status from two UUnits
         """
-        return ComparisonStatus.EQUAL if value1.compare(value2) \
-          else ComparisonStatus.DIFFERENT
+        if value1 is None or value2 is None:
+            bequal = value1 == value2
+        else:
+            bequal = value1.compare(value2)
 
-
+        return ComparisonStatus.EQUAL if bequal else ComparisonStatus.DIFFERENT
 
 
 class ComparisonResult():
