@@ -43,7 +43,8 @@ class UComparator():
                 if child is not None:
                     self.__queue.put(child)
 
-            print(item)
+            if item.is_leaf():
+                print(item)
 
         return self.__result
 

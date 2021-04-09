@@ -18,7 +18,12 @@ class ComparisonStatus(Enum):
     EQUAL         = 3
 
     def __lt__(self, other):
-        return self.value < other.value
+        return isinstance(other, type(self)) and self.value == other.value
+
+    @staticmethod
+    def create(value1, value2):
+        return ComparisonStatus.EQUAL if value1 == value2 \
+          else ComparisonStatus.DIFFERENT
 
 
 
@@ -39,7 +44,7 @@ class ComparisonResult():
             Default Constructor
         """
         self.__status  = ComparisonStatus.PENDING
-        self.__units   = (unit1, unit2)
+        self.__units   = (unit1, unit2, ComparisonStatus.create(unit1, unit2))
         self.__parent  = weakref.ref(parent) if parent is not None else None
 
 
@@ -47,14 +52,8 @@ class ComparisonResult():
         """
             Resolves by comparing unit 1 to unit 2
         """
-        # Check for absent unit
-        # Sometimes product #1 may have a unit while product #2 doesn't and
-        # vice-versa
-        if any((x is None for x in self.__units)):
-            self.status = ComparisonStatus.DIFFERENT
-            return
-
-        # Else, process children
+        # Process children
+        # Children will be empty if any unit is None
         child_1_only, child_2_only, child_common = self._align_children()
         self.__children = list()
         self.__children.extend(ComparisonResult(x1  , None, self) for x1    in child_1_only)
@@ -64,9 +63,7 @@ class ComparisonResult():
         yield from self.__children
 
         # Compare itself
-        if self.status == ComparisonStatus.PENDING and all(map(lambda x: x.status != ComparisonStatus.PENDING, self.__children)):
-            self.status = ComparisonStatus.EQUAL if self.__units[0] == self.__units[1] \
-                     else ComparisonStatus.DIFFERENT
+        self.update()
 
 
     @property
@@ -87,18 +84,46 @@ class ComparisonResult():
             if (self.__parent):
                 self.__parent().notify()
 
+        return self.__status
+
+
+    def update(self):
+        """
+            Updates self status if current status is pending
+              - and children are no longer pending
+              - (or) has no children
+        """
+        if self.status == ComparisonStatus.PENDING and \
+            all(map(lambda x: x.status != ComparisonStatus.PENDING, self.__children)):
+            self.notify()
+
     def notify(self):
         """
-            Updates status after getting notified that children was updated
+            Updates status according to children status and its own
+            This function is called when a status is changed and it propagates
+            to parents (via status.setter)
         """
-        self.status = min(x.status for x in self.__children)
+        self.status = min(self.__units[-1], min((x.status for x in self.__children), default=ComparisonStatus.EQUAL))
+
+
+    def is_leaf(self):
+        """
+            A result is a leaf if there's no children,
+            Status must also be final (equal or different)
+        """
+        if (self.status == ComparisonStatus.DIFFERENT or \
+            self.status == ComparisonStatus.EQUAL   ) and len(self.__children) == 0:
+            return True
+
+        # Else
+        return False
 
 
     def __repr__(self):
         """
             String representation
         """
-        return f"{self.__units[0]} Vs. {self.__units[1]} : {self.__status}"
+        return f"{self.__units[0]} Vs. {self.__units[1]} : {self.status}"
 
     # ##########################################################################
     # Private methods
@@ -109,7 +134,12 @@ class ComparisonResult():
             - children units only in unit #1
             - children units only in unit #2
             - children units common to both units for comparison
+
+            Tuples will be be empty if unit1 or unit is None
         """
+        if any((x is None for x in self.__units)):
+            return tuple(), tuple(), tuple()
+
         child_1      = tuple(UFactory.create(x, self.__units[0].depth + 1) for x in self.__units[0].children())
         child_2      = tuple(UFactory.create(x, self.__units[1].depth + 1) for x in self.__units[1].children())
         child_1_only = tuple(x for x in child_1 if x not in child_2)
