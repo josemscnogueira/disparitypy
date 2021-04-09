@@ -41,6 +41,18 @@ class UUnit(ABC):
     def label(self):
         return self._label()
 
+    def close(self):
+        """
+            Do nothing, there's no assets associated with this abstract class
+            This method is useful is a specific unit is associated with a resource
+            that shoulbe be closed after using it completly.
+            e.g. when the comparator/result analyse two units, often the unit
+                 also has children which use the same resources. the comparator
+                 works by analysing everything in depth, which guarantees that a
+                 specific unit has its comparison done when all of its children
+                 are analyized. it might be useful to call close() at that time
+        """
+
     # ##########################################################################
     # Python built-in methods
     # ##########################################################################
@@ -65,15 +77,14 @@ class UUnit(ABC):
 
 
 
-class UAtomic(UUnit):
+class UCached(UUnit):
     """
         Abstract class exactly as UUnit, but children are created on constructor,
         and access is limited to a context manager
 
         Instances should be considered immutable
     """
-    _children        : tuple[UUnit]
-    _context_manager : object = None
+    _children:tuple[UUnit] = tuple()
 
 
     def __init__(self):
@@ -81,9 +92,16 @@ class UAtomic(UUnit):
             Default constructor should populate children
             Context manager can't be none
         """
-        assert self._context_manager is not None
         self._children_init()
 
+
+    def children(self):
+        yield from self._children
+
+
+    # ##########################################################################
+    # Abstract methods to implement
+    # ##########################################################################
     @abstractmethod
     def _children_init(self):
         """
@@ -91,6 +109,3 @@ class UAtomic(UUnit):
             In principle, these children should be created using the context
             manager.
         """
-
-    def children(self):
-        yield from self._children

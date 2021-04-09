@@ -34,23 +34,27 @@ class UNetcdfGroup(UNetcdfAtomic):
     @property
     def __variables(self):
         for var in self().variables:
-            yield UNetcdfVariable( self._context_manager, name=var, access=self.access)
-
+            yield UNetcdfVariable( self.path, name   = var        , \
+                                              access = self.access, \
+                                              parent = self.origin)
     @property
     def __dimensions(self):
         for dim in self().dimensions:
-            yield UNetcdfDimension(self._context_manager, name=dim, access=self.access)
-
+            yield UNetcdfDimension(self.path, name   = dim        , \
+                                              access = self.access, \
+                                              parent = self.origin)
     @property
     def __attributes(self):
         for att in self().ncattrs():
-            yield UNetcdfAttribute(self._context_manager, name=att, access=self.access)
-
+            yield UNetcdfAttribute(self.path, name   = att        , \
+                                              access = self.access, \
+                                              parent = self.origin)
     @property
     def __groups(self):
         for grp in self().groups:
-            yield UNetcdfGroup(    self._context_manager, name=grp, access=self.access)
-
+            yield UNetcdfGroup(    self.path, name   = grp        , \
+                                              access = self.access, \
+                                              parent = self.origin)
     @property
     def __all_items(self):
         yield from itertools.chain(self.__variables ,

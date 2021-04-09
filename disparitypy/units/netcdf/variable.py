@@ -21,4 +21,6 @@ class UNetcdfVariable(UNetcdfAtomic):
     @property
     def __attributes(self):
         for att in self().ncattrs():
-            yield UNetcdfAttribute(self._context_manager, name=att, access=self.access)
+            yield UNetcdfAttribute(self.path, name   = att        , \
+                                              access = self.access, \
+                                              parent = self.origin)

@@ -21,5 +21,4 @@ class UNetcdf(UFile):
         """
             Returns other units contained inside this one
         """
-        with Dataset(self.path) as ncid:
-            return (UNetcdfGroup(ncid),)
+        return (UNetcdfGroup(self.path),)

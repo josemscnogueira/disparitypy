@@ -36,15 +36,21 @@ class UComparator():
         # Process all comparisons in queue
         while not self.__queue.empty():
             # Get the last item inserted
-            item = self.__queue.get()
+            item:ComparisonResult = self.__queue.get()
 
             # Solve sub-sequent (nested) comparisons
             for child in item.resolve():
                 if child is not None:
                     self.__queue.put(child)
 
+            # FIXME: remove please
+            # FIXME: remove please
+            # FIXME: remove please
             if item.is_leaf():
-                print(item)
+                print(item.is_leaf(), item)
+            # FIXME: remove please
+            # FIXME: remove please
+            # FIXME: remove please
 
         return self.__result
 

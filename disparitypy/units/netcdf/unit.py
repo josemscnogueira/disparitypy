@@ -1,33 +1,40 @@
 # ##############################################################################
 # System imports
 # ##############################################################################
-from netCDF4 import Dataset
+import weakref
+from   netCDF4 import Dataset
 
 # ##############################################################################
 # Project imports
 # ##############################################################################
-from ..unit import UAtomic
+from ..unit import UCached
 
 
-class UNetcdfAtomic(UAtomic):
+class UNetcdfAtomic(UCached):
     """
         Base (abstract) class for all netcdf items (variables, groups, dimensions)
     """
     # ##########################################################################
     # Attributes
     # ##########################################################################
+    __origin:weakref    = None
+    __ncid:Dataset      = None
+    __path:str          = str()
     __access:tuple[str] = tuple()
 
     # ##########################################################################
     # Constructor
     # ##########################################################################
-    def __init__(self, context_manager:Dataset, /, name:str=str(), access:tuple[str]=tuple()):
+    def __init__(self, filepath:str, /, name   : str        = str(),   \
+                                        access : tuple[str] = tuple(), \
+                                        parent : weakref    = None):
         """
             Default constructor
         """
         # Call UAtomic Constructor
-        self._context_manager = context_manager
-        self.__access         = (access + (name,)) if name else access
+        self.__origin = parent or None
+        self.__path   = filepath
+        self.__access = (access + (name,)) if name else access
         super().__init__()
 
 
@@ -46,6 +53,41 @@ class UNetcdfAtomic(UAtomic):
     # Utility methods
     # ##########################################################################
     @property
+    def origin(self):
+        """
+            Returns origin:
+                - it can be itself, if there is no origin
+                - it can be origin provided in the constructor
+        """
+        return self.__origin or weakref.ref(self)
+
+
+    @property
+    def ncid(self):
+        """
+            Returns a valid handler to the underlying netcdf object
+            Closing this asset is the responsability of the caller
+        """
+        if not self.__ncid:
+            if self.__origin:
+                self.__ncid = self.__origin().ncid
+            else:
+                print(f"JONN DEBUG | Opening >> {self.path}")
+                self.__ncid = Dataset(self.path)
+
+        return self.__ncid
+
+
+    def close(self):
+        """
+            Removes and closes handle to underlyings netcdf object
+            Let the garbage collector and the destructor of the netcdf Dataset
+            object close the file access
+        """
+        self.__ncid = None
+
+
+    @property
     def access(self):
         """
             Retrives access tuple
@@ -57,8 +99,7 @@ class UNetcdfAtomic(UAtomic):
         """
             Accesses the underlying netcdf object
         """
-        assert self._context_manager.isopen()
-        result = self._context_manager
+        result = self.ncid
 
         for elem in self.__access:
             result = result[elem]
@@ -68,4 +109,4 @@ class UNetcdfAtomic(UAtomic):
 
     @property
     def path(self):
-        return self._context_manager.filepath()
+        return self.__path

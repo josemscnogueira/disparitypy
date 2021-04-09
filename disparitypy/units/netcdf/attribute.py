@@ -15,6 +15,8 @@ class UNetcdfAttribute(UNetcdfAtomic):
         """
             Two units are consired equal (in this case: comparable if)
         """
+        # FIXME: This is the problem of the current exception beign raised
+        # FIXME: ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
         if isinstance(other, type(self)):
             return self.__call__() == other()
         # Else
@@ -37,8 +39,7 @@ class UNetcdfAttribute(UNetcdfAtomic):
         """
             Accesses the underlying netcdf object
         """
-        assert self._context_manager.isopen()
-        result = self._context_manager
+        result = self.ncid
 
         for elem in self.access[:-1]:
             result = result[elem]
