@@ -81,6 +81,14 @@ class ComparisonResult():
         if (value != self.__status):
             self.__status = value
 
+            # Close units
+            if self.status == ComparisonStatus.EQUAL or \
+               self.status == ComparisonStatus.DIFFERENT:
+                if self.__units[0]:
+                    self.__units[0].close()
+                if self.__units[1]:
+                    self.__units[1].close()
+
             if (self.__parent):
                 self.__parent().notify()
 
@@ -142,6 +150,13 @@ class ComparisonResult():
 
         child_1      = tuple(UFactory.create(x) for x in self.__units[0].children())
         child_2      = tuple(UFactory.create(x) for x in self.__units[1].children())
+        for x in child_1:
+            print(x, child_2)
+            if x not in child_2:
+                print(x)
+        #print(child_1)
+        #print(child_2)
+
         child_1_only = tuple(x for x in child_1 if x not in child_2)
         child_2_only = tuple(x for x in child_2 if x not in child_1)
         child_common = tuple(zip((x for x in child_1 if x not in child_1_only), \

@@ -18,7 +18,6 @@ class UComparator():
     """
     # Instance attributes
     __result : ComparisonResult
-    __queue  : Queue = Queue()
 
 
     def __init__(self, unit1 : UUnit, unit2 : UUnit):
@@ -26,28 +25,32 @@ class UComparator():
             Default Constructor
         """
         self.__result = ComparisonResult(unit1, unit2)
-        self.__queue.put(self.__result)
 
 
     def compare(self):
         """
             Returns a comparison result Unit
         """
+        queue = Queue()
+        queue.put(self.__result)
+
         # Process all comparisons in queue
-        while not self.__queue.empty():
+        while not queue.empty():
             # Get the last item inserted
-            item:ComparisonResult = self.__queue.get()
+            item:ComparisonResult = queue.get()
 
             # Solve sub-sequent (nested) comparisons
             for child in item.resolve():
+                # FIXME: remove if and assert
+                assert child is not None
                 if child is not None:
-                    self.__queue.put(child)
+                    queue.put(child)
 
             # FIXME: remove please
             # FIXME: remove please
             # FIXME: remove please
             if item.is_leaf():
-                print(item.is_leaf(), item)
+                print(item)
             # FIXME: remove please
             # FIXME: remove please
             # FIXME: remove please
