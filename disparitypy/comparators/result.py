@@ -11,18 +11,34 @@ from   enum    import Enum
 from ..units.unit         import UUnit
 from ..units.factory      import UFactory
 
+
 class ComparisonStatus(Enum):
+    """
+        Comparison Status class.
+        UNINITIALIZED and PENDING are both states where the units have not been
+                                  compared yet
+        DIFFERENT and EQUAL define the final states of the comparison. This
+                                  final state can only be achieve when the
+                                  units to compare and their corresponding
+                                  dependencies have been compared
+    """
     UNINITIALIZED = 0
     DIFFERENT     = 1
     PENDING       = 2
     EQUAL         = 3
 
     def __lt__(self, other):
-        return isinstance(other, type(self)) and self.value == other.value
+        """
+            Nomerical comparison
+        """
+        return isinstance(other, type(self)) and self.value < other.value
 
     @staticmethod
-    def create(value1, value2):
-        return ComparisonStatus.EQUAL if value1 == value2 \
+    def create(value1:UUnit, value2:UUnit):
+        """
+            Creates a Comparison status from two UUnits
+        """
+        return ComparisonStatus.EQUAL if value1.compare(value2) \
           else ComparisonStatus.DIFFERENT
 
 
@@ -73,26 +89,38 @@ class ComparisonResult():
         """
         return self.__status
 
+
     @status.setter
     def status(self, value : ComparisonStatus):
         """
             Updates status and notifies parent in case status was changed
         """
+        # Only update status if status has changed
         if (value != self.__status):
             self.__status = value
 
             # Close units
-            if self.status == ComparisonStatus.EQUAL or \
-               self.status == ComparisonStatus.DIFFERENT:
-                if self.__units[0]:
-                    self.__units[0].close()
-                if self.__units[1]:
-                    self.__units[1].close()
+            self.close()
 
+            # Notify parent, because the status of one of its children is finished
+            # if all children are finished, then it's time to update parent's
+            # status
             if (self.__parent):
                 self.__parent().notify()
 
-        return self.__status
+        return self.status
+
+
+    def close(self):
+        """
+            Closes units if the comparator (self) has already finished comparing
+        """
+        if self.status == ComparisonStatus.EQUAL or \
+           self.status == ComparisonStatus.DIFFERENT:
+            if self.__units[0]:
+                self.__units[0].close()
+            if self.__units[1]:
+                self.__units[1].close()
 
 
     def update(self):
@@ -120,8 +148,8 @@ class ComparisonResult():
             Status must also be final (equal or different)
         """
         if (self.status == ComparisonStatus.DIFFERENT or \
-            self.status == ComparisonStatus.EQUAL   ) and len(self.__children) == 0:
-            return True
+            self.status == ComparisonStatus.EQUAL   ):
+            return len(self.__children) == 0
 
         # Else
         return False
@@ -132,6 +160,7 @@ class ComparisonResult():
             String representation
         """
         return f"{self.__units[0]} Vs. {self.__units[1]} : {self.status}"
+
 
     # ##########################################################################
     # Private methods
@@ -150,18 +179,12 @@ class ComparisonResult():
 
         child_1      = tuple(UFactory.create(x) for x in self.__units[0].children())
         child_2      = tuple(UFactory.create(x) for x in self.__units[1].children())
-        for x in child_1:
-            print(x, child_2)
-            if x not in child_2:
-                print(x)
-        #print(child_1)
-        #print(child_2)
-
         child_1_only = tuple(x for x in child_1 if x not in child_2)
         child_2_only = tuple(x for x in child_2 if x not in child_1)
         child_common = tuple(zip((x for x in child_1 if x not in child_1_only), \
                                  (x for x in child_2 if x not in child_2_only)))
 
+        # Return children in groups
         return child_1_only, \
                child_2_only, \
                child_common

@@ -72,7 +72,6 @@ class UNetcdfAtomic(UCached):
             if self.__origin:
                 self.__ncid = self.__origin().ncid
             else:
-                print(f"JONN DEBUG | Opening >> {self.path}")
                 self.__ncid = Dataset(self.path)
 
         return self.__ncid
@@ -109,4 +108,7 @@ class UNetcdfAtomic(UCached):
 
     @property
     def path(self):
+        """
+            Returns the path of the underlying NetCDF file
+        """
         return self.__path

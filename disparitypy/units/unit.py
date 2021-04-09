@@ -53,6 +53,14 @@ class UUnit(ABC):
                  are analyized. it might be useful to call close() at that time
         """
 
+    def compare(self, other):
+        """
+            This is the method that will be used to compare two units of the same
+            type with the same label
+            By default, this comparison will be exactly like __eq__ (== operator)
+        """
+        return self == other
+
     # ##########################################################################
     # Python built-in methods
     # ##########################################################################

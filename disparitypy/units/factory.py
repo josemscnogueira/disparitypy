@@ -1,11 +1,11 @@
 """
     Creates units depending on a set of rules
 """
-
 # ##############################################################################
 # System Imports
 # ##############################################################################
 import os
+
 
 # ##############################################################################
 # Project Imports
@@ -24,7 +24,6 @@ class UFactory():
     """
         Creates a Units depending on the input value
     """
-
     @staticmethod
     def create(value):
         """
@@ -32,22 +31,25 @@ class UFactory():
                 - Folder : value is string and it's a path to a folder
                 - File   : value is string and it's a path to a file
         """
+        # Folder instance
         if isinstance(value, str) and os.path.isdir(value):
             return UFolder(value)
+
+        # File instance
         if isinstance(value, str) and os.path.isfile(value):
             return UFile(value)
 
-        # Files Only
+        # File specializations
         if isinstance(value, UFile):
             if (value.label.endswith('.nc')):
                 return UNetcdf(value.path)
 
-        if isinstance(value, UNetcdfGroup) or \
-           isinstance(value, UNetcdfVariable) or \
+        # Netcdf specializations
+        if isinstance(value, UNetcdfGroup    ) or \
+           isinstance(value, UNetcdfVariable ) or \
            isinstance(value, UNetcdfDimension) or \
            isinstance(value, UNetcdfAttribute):
             return value
-
 
 
     @staticmethod

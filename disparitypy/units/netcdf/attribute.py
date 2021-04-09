@@ -1,4 +1,10 @@
 # ##############################################################################
+# System imports
+# ##############################################################################
+from   collections.abc import Iterable
+
+
+# ##############################################################################
 # Project imports
 # ##############################################################################
 from .unit import UNetcdfAtomic
@@ -11,16 +17,19 @@ class UNetcdfAttribute(UNetcdfAtomic):
     # ##########################################################################
     # Interfaces from Abstract class UUnit
     # ##########################################################################
-    def __eq__(self, other):
+    def compare(self, other):
         """
             Two units are consired equal (in this case: comparable if)
         """
-        # FIXME: This is the problem of the current exception beign raised
-        # FIXME: ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+        result = False
         if isinstance(other, type(self)):
-            return self.__call__() == other()
+            result = self.__call__() == other()
+
+            # There's instances where the result is a list/tuple/iterable
+            if isinstance(result, Iterable):
+                result = all(result)
         # Else
-        return False
+        return result
 
 
     # ##########################################################################

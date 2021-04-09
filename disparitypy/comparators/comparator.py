@@ -50,7 +50,8 @@ class UComparator():
             # FIXME: remove please
             # FIXME: remove please
             if item.is_leaf():
-                print(item)
+                if item.status == ComparisonStatus.DIFFERENT:
+                    print(item)
             # FIXME: remove please
             # FIXME: remove please
             # FIXME: remove please
