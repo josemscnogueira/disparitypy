@@ -10,10 +10,14 @@ import os
 # ##############################################################################
 # Project Imports
 # ##############################################################################
-from .unit          import UUnit
-from .folder        import UFolder
-from .file          import UFile
-from .netcdf.netcdf import UNetcdf
+from .unit             import UUnit
+from .folder           import UFolder
+from .file             import UFile
+from .netcdf.netcdf    import UNetcdf
+from .netcdf.group     import UNetcdfGroup
+from .netcdf.variable  import UNetcdfVariable
+from .netcdf.dimension import UNetcdfDimension
+from .netcdf.attribute import UNetcdfAttribute
 
 
 class UFactory():
@@ -37,6 +41,13 @@ class UFactory():
         if isinstance(value, UFile):
             if (value.label.endswith('.nc')):
                 return UNetcdf(value.path)
+
+        if isinstance(value, UNetcdfGroup) or \
+           isinstance(value, UNetcdfVariable) or \
+           isinstance(value, UNetcdfDimension) or \
+           isinstance(value, UNetcdfAttribute):
+            return value
+
 
 
     @staticmethod

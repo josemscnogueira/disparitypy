@@ -22,10 +22,4 @@ class UNetcdf(UFile):
             Returns other units contained inside this one
         """
         with Dataset(self.path) as ncid:
-            result = (UNetcdfGroup(ncid),)
-
-            print(list(result[0].children()))
-
-            exit(0)
-
-            return result
+            return (UNetcdfGroup(ncid),)
