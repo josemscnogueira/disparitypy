@@ -33,6 +33,13 @@ class UUnit(ABC):
     # ##########################################################################
     # Properties
     # ##########################################################################
+    def is_leaf(self):
+        """
+            Returns true at firt child occurrence
+            Returns false if no children (default of any)
+        """
+        return any(True for _ in self.children())
+
     @property
     def label(self):
         return self._label()
@@ -55,7 +62,7 @@ class UUnit(ABC):
         """
             Two units are consired equal (in this case: comparable if)
         """
-        return isinstance(other, type(self)) and self.label == other.label
+        return self.__class__ == other.__class__ and self.label == other.label
 
     def __hash__(self):
         """

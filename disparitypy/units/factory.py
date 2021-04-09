@@ -36,7 +36,6 @@ class UFactory():
         # Files Only
         if isinstance(value, UFile):
             if (value.label.endswith('.nc')):
-                print("HERE" , value.path)
                 return UNetcdf(value.path, depth)
 
 
