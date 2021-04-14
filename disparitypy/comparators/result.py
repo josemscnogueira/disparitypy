@@ -2,7 +2,7 @@
 # System Imports
 # ##############################################################################
 import weakref
-from   enum    import Enum
+from   enum    import Enum, unique
 
 
 # ##############################################################################
@@ -11,7 +11,7 @@ from   enum    import Enum
 from ..units.unit         import UUnit
 from ..units.factory      import UFactory
 
-
+@unique
 class ComparisonStatus(Enum):
     """
         Comparison Status class.
